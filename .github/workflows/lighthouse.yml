@@ -1,0 +1,32 @@
+name: lighthouse
+# 배포 주소의 모바일 Lighthouse 점수를 깨끗한 러너에서 측정(수동 실행)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: 측정(3회)
+        run: |
+          URL="https://sternjeong.github.io/olpark-multtae/"
+          for i in 1 2 3; do
+            npx --yes lighthouse@12.2.1 "$URL" --quiet --output=json --output-path="lh$i.json" \
+              --only-categories=performance,accessibility,best-practices \
+              --chrome-flags="--headless=new --no-sandbox"
+          done
+      - name: 요약
+        run: |
+          node -e '
+            const fs=require("fs");
+            let out="| 회차 | 성능 | 접근성 | 권장사항 | LCP | TBT | CLS |\n|---|---|---|---|---|---|---|\n";
+            for (const i of [1,2,3]) {
+              const r=JSON.parse(fs.readFileSync(`lh${i}.json`)); const c=r.categories, a=r.audits;
+              out+=`| ${i} | ${Math.round(c.performance.score*100)} | ${Math.round(c.accessibility.score*100)} | ${Math.round(c["best-practices"].score*100)} | ${a["largest-contentful-paint"].displayValue} | ${a["total-blocking-time"].displayValue} | ${a["cumulative-layout-shift"].displayValue} |\n`;
+            }
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,out); console.log(out);'
