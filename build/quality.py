@@ -283,9 +283,26 @@ def insights(profiles, classes, season, zone):
     ]
 
 
-def build(today, profiles, classes, season, live, built_at):
+def track_status(checks, prev, today):
+    """해결됨 자동 감지: 이전 산출물에서 열려 있던 점검이 이번에 결함 0이면 resolved_at = 오늘.
+    이미 해결된 점검은 날짜를 유지하고, 다시 결함이 생기면 open으로 돌아가 날짜를 지운다."""
+    before = {c["id"]: c for c in (prev or {}).get("checks", [])}
+    for c in checks:
+        p = before.get(c["id"], {})
+        c["open_since"] = p.get("open_since") or (today.isoformat() if c["status"] == "open" else None)
+        if c["status"] == "resolved":
+            c["resolved_at"] = p.get("resolved_at") if p.get("status") == "resolved" and p.get("resolved_at") else today.isoformat()
+        else:
+            c["resolved_at"] = None
+            if p.get("status") == "resolved":
+                c["open_since"] = today.isoformat()
+    return checks
+
+
+def build(today, profiles, classes, season, live, built_at, prev=None):
     checks = [q01(), q02(), q03(today), q04(today), q05(), q06(), q07(), q08(), q09(), q10(today),
               q11(live, profiles, season), q12()]
+    track_status(checks, prev, today)
     z = zones()
     return {"schema": "quality/1", "built_at": built_at, "checks": checks,
             "insights": insights(profiles, classes, season, z), "zones": z,

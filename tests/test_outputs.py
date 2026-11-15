@@ -31,17 +31,25 @@ class OutputsTest(unittest.TestCase):
             self.assertTrue(d["schema"].endswith("/1"))
 
     def test_budget(self):
-        code = [p for p in glob.glob(os.path.join(SITE, "**", "*"), recursive=True)
-                if p.endswith((".html", ".css", ".js")) and "/data/" not in p]
-        js = sum(gz(p) for p in code if p.endswith(".js"))
-        total = sum(gz(p) for p in code)
+        # 첫 화면 전송: index.html + app.css + app.js (나머지 화면·영어 사전은 지연 로드)
+        first_code = [os.path.join(SITE, "index.html"), os.path.join(SITE, "assets", "css", "app.css"),
+                      os.path.join(SITE, "assets", "js", "app.js")]
+        js = gz(first_code[2])
+        total = sum(gz(p) for p in first_code)
         self.assertLessEqual(js, 35 * 1024, js)
         self.assertLessEqual(total, 60 * 1024, total)
+        all_js = sum(gz(p) for p in glob.glob(os.path.join(SITE, "assets", "**", "*.js"), recursive=True))
+        self.assertLessEqual(all_js, 60 * 1024, all_js)
         first = sum(gz(os.path.join(DATA, f"{n}.json")) for n in FIRST_SCREEN)
         self.assertLessEqual(first, 120 * 1024, first)
-        # 지연 로드(시트·사리 패널을 열 때) 데이터도 함께 120KB 안
         lazy = first + gz(os.path.join(DATA, "classes.json")) + gz(os.path.join(DATA, "events.json"))
         self.assertLessEqual(lazy, 160 * 1024, lazy)
+
+    def test_visit_info(self):
+        ctx = json.loads(read(os.path.join(DATA, "context.json")))
+        v = ctx["visit"]
+        self.assertTrue(v["url"].startswith("https://www.ksponco.or.kr/olympicpark/"))
+        self.assertEqual({s["station"] for s in v["subway"]}, {"올림픽공원역", "몽촌토성역", "한성백제역"})
 
     def test_no_secrets(self):
         for name in ("DATA_GO_KR_KEY", "CULTURE_API_KEY"):

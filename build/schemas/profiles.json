@@ -11,7 +11,10 @@
   "dwell_hist",
   "event_detection",
   "event_overlay",
-  "weekday_scenario"
+  "weekday_scenario",
+  "daytime",
+  "dispersion",
+  "tide_rules"
  ],
  "properties": {
   "schema": {
@@ -574,6 +577,66 @@
      "type": "boolean",
      "enum": [
       false
+     ]
+    }
+   }
+  },
+  "daytime": {
+   "type": "object",
+   "required": [
+    "weekday",
+    "sat",
+    "sun"
+   ],
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "peak_k",
+     "peak",
+     "windows"
+    ],
+    "properties": {
+     "windows": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {
+       "type": "object",
+       "required": [
+        "start_k",
+        "mean",
+        "reduction"
+       ],
+       "properties": {
+        "start_k": {
+         "type": "integer",
+         "minimum": 60,
+         "maximum": 102
+        },
+        "reduction": {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 1
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "dispersion": {
+   "type": "object",
+   "required": [
+    "day_shift",
+    "exit_queue"
+   ],
+   "properties": {
+    "exit_queue": {
+     "type": "object",
+     "required": [
+      "params",
+      "table",
+      "assumption"
      ]
     }
    }

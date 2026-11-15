@@ -74,3 +74,29 @@ def low_windows(occ, arr):
 def peak_arrival(arr):
     a, b = ARR_RANGE
     return max(range(a, b), key=lambda k: arr[k])
+
+
+DAY_RANGE = (60, 108)    # 10:00 ~ 18:00 (방문 시간대, 끝 미포함)
+DAY_WIN = 6              # 60분 창
+DAY_MIN_RED = 0.10       # 두 번째 창은 낮 최고 대비 10% 이상 낮을 때만
+DAY_MAX = 2
+
+
+def daytime_quiet(occ):
+    """낮(10~18시) '덜 붐비는 때': 3구간 평활 점유의 60분 평균이 가장 낮은 창 1~2개와 낮 최고 대비 감소율.
+    반환: (peak_k, peak, [(start_k, mean, reduction)])"""
+    sm = smooth3(occ)
+    a, b = DAY_RANGE
+    peak_k = max(range(a, b), key=lambda k: sm[k])
+    peak = sm[peak_k]
+    wins = sorted((sum(sm[k:k + DAY_WIN]) / DAY_WIN, k) for k in range(a, b - DAY_WIN + 1))
+    out = []
+    for m, k in wins:
+        red = 1 - m / peak
+        if out and red < DAY_MIN_RED:
+            break
+        if all(abs(k - c) >= DAY_WIN for c, _, _ in out):
+            out.append((k, m, red))
+        if len(out) == DAY_MAX:
+            break
+    return peak_k, peak, sorted(out)

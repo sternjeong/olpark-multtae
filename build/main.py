@@ -12,7 +12,7 @@ import os
 import re
 import sys
 
-from . import (backtest, config, context, fetch, io_csv, live, model_classes, model_profiles, model_season,
+from . import (backtest, config, context, dispersion, fetch, io_csv, live, model_classes, model_profiles, model_season,
                normalize, quality, tide, validate)
 from .adapters import holidays as hol_adapter
 from .adapters import kcisa, kma, key, scrub
@@ -115,6 +115,12 @@ def main(argv=None):
 
     print("2/9 profiles", file=sys.stderr)
     profiles, pk, event_days = model_profiles.build(rows, posters, built_at)
+    profiles["dispersion"] = dispersion.build(pk, profiles, event_days)
+    profiles["daytime"] = {}
+    for g, G in profiles["groups"].items():
+        pk_k, peak, wins = tide.daytime_quiet(G["occ"])
+        profiles["daytime"][g] = {"peak_k": pk_k, "peak": round(peak, 1),
+                                  "windows": [{"start_k": k, "mean": round(m, 1), "reduction": round(r, 3)} for k, m, r in wins]}
     print("3/9 season", file=sys.stderr)
     season = model_season.build(normalize.load_monthly(), built_at)
     print("4/9 classes", file=sys.stderr)
@@ -134,6 +140,7 @@ def main(argv=None):
         print(scrub(e, *secrets), file=sys.stderr)
     ctx = context.build_context(normalize.load_notices(), normalize.load_lawn(), normalize.load_faq(), today,
                                 built_at, weather, warnings)
+    ctx["visit"] = io_csv.load_static("visit_info.json")
     ev = context.build_events(normalize.load_events_en(), today, built_at)
     try:
         k_items = kcisa.fetch_events(today)
@@ -149,7 +156,13 @@ def main(argv=None):
     print("7/9 live", file=sys.stderr)
     lv = live.build(a.archive, out, built_at, today)
     print("8/9 quality", file=sys.stderr)
-    q = quality.build(today, profiles, classes, season, lv, built_at)
+    prev_q = None
+    try:
+        with open(os.path.join(out, "quality.json"), encoding="utf-8") as f:
+            prev_q = json.load(f)
+    except (OSError, ValueError):
+        pass
+    q = quality.build(today, profiles, classes, season, lv, built_at, prev=prev_q)
 
     man = io_csv.manifest()
     meta = {

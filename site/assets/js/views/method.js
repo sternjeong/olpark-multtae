@@ -1,7 +1,7 @@
 // S6 계산 방법·출처 — 모든 숫자·파라미터는 JSON에서 읽는다.
-import { $, esc, fmtN, fmtStamp, GROUP_KO, hm, load, loadCore, setTitle } from '../app.js';
+import { $, esc, fmtN, fmtStamp, GROUP_KO, hm, koOnlyNote, load, loadCore, setTitle } from '../app.js';
 
-const SECTIONS = [['data', '쓴 데이터'], ['occupancy', '점유 재구성'], ['profile', '요일군 프로파일'], ['season', '계절 지수'], ['classes', '강좌 계수 β'], ['tide', '만조·한산한 창 규칙'], ['sari', '사리 시나리오'], ['live', '실시간·아카이브'], ['backtest', '검증'], ['limits', '한계'], ['keys', '키 연동 상태'], ['license', '출처·이용허락']];
+const SECTIONS = [['data', '쓴 데이터'], ['occupancy', '점유 재구성'], ['profile', '요일군 프로파일'], ['season', '계절 지수'], ['classes', '강좌 계수 β'], ['tide', '만조·한산한 창 규칙'], ['dispersion', '분산 효과 모델'], ['visit', '편하게 방문하기 출처'], ['sari', '사리 시나리오'], ['live', '실시간·아카이브'], ['backtest', '검증'], ['limits', '한계'], ['keys', '키 연동 상태'], ['impact', '공익 효과 측정 계획'], ['license', '출처·이용허락']];
 const USE = {
   15138735: '점유 재구성·요일군 프로파일·사리·짧은 정차·백테스트', 15101610: '강좌 시작 수요·β·실험실', 15110953: '강좌 시작 수요·β·실험실(좀비 행 제외)',
   15131671: '월 계절 지수', 15168686: '실시간 수위·자체 아카이브', 15099006: '공연 기준 시작 시각(T_ref)', 15149169: '공연 기록 목록',
@@ -28,7 +28,14 @@ export default async function viewMethod(main, anchor) {
   const lic = M.sources.map((s) => `<tr><td>${esc(s.id)}</td><td>${esc(s.name)}</td><td>한국체육산업개발(주)</td><td>${esc(s.license)}</td><td>${esc((M.periods[s.id] || []).join(' ~ '))}</td><td>${esc(s.via)}</td><td>${esc(fmtStamp(s.fetched_at))}</td><td><a href="${esc(s.url)}" rel="noopener">포털</a></td></tr>`).join('');
   const hol = D.holidays;
   const ed = P.event_detection;
-  main.innerHTML = `<h1 tabindex="-1">계산 방법·출처</h1>
+  const DS = P.dispersion, DT = P.daytime, V = D.context.visit;
+  const dtRows = Object.entries(DT).map(([g, v]) => `<tr><th scope="row">${GROUP_KO[g]}</th><td>${hm(v.peak_k * 10)} (${fmtN(v.peak)}대)</td><td>${v.windows.map((w) => `${hm(w.start_k * 10)}~${hm(w.start_k * 10 + 60)} (−${(w.reduction * 100).toFixed(0)}%)`).join(', ')}</td></tr>`).join('');
+  const dsRows = Object.entries(DS.day_shift).map(([g, v]) => { const r = v.rows.find((x) => x.f === 0.3); return `<tr><th scope="row">${GROUP_KO[g]}</th><td>${hm(v.p_bins[0] * 10)}~${hm(v.p_bins[1] * 10)} → ${hm(v.q_start_k * 10)}~${hm(v.q_end_k * 10)}</td><td class="n">${fmtN(r.moved_cars[1])}</td><td class="n">${fmtN(r.occ_peak_red[1])}대 (${(r.occ_peak_red_pct[1] * 100).toFixed(1)}%, 범위 ${(r.occ_peak_red_pct[0] * 100).toFixed(1)}~${(r.occ_peak_red_pct[2] * 100).toFixed(1)}%)</td><td class="n">${v.n_days}</td></tr>`; }).join('');
+  const qb = DS.exit_queue.table.find((x) => x.f === 0 && x.spread_min === 60), q3 = DS.exit_queue.table.find((x) => x.f === 0.3 && x.spread_min === 60);
+  const qRows = DS.exit_queue.params.map((p, i) => `<tr><th scope="row">${GROUP_KO[p.group]} ${esc(p.source_day)}</th><td class="n">${fmtN(p.M)}</td><td class="n">${fmtN(p.c10)}</td><td class="n">${fmtN(qb.wait_car_min[i])} (${(qb.wait_car_min[i] / p.M).toFixed(1)}분/대)</td><td class="n">${fmtN(q3.wait_car_min[i])} (−${((1 - q3.wait_car_min[i] / qb.wait_car_min[i]) * 100).toFixed(0)}%)</td></tr>`).join('');
+  const Q = await load('quality', { optional: true });
+  const resolved = Q ? Q.checks.filter((c) => c.status === 'resolved').length : 0;
+  main.innerHTML = `${koOnlyNote()}<h1 tabindex="-1">계산 방법·출처</h1>
 <p>화면의 모든 숫자는 아래 식으로 빌드할 때마다 원자료에서 다시 계산해요. 아래 값도 같은 JSON에서 읽어 보여 드려요.</p>
 <nav class="card" aria-label="목차"><ol class="toc">${SECTIONS.map(([id, t]) => `<li><a href="./#/method/${id}">${t}</a></li>`).join('')}</ol></nav>
 ${sec('data', '쓴 데이터', `<p>한국체육산업개발(주) 개방 데이터 ${M.sources.length}종(실시간 API 포함)을 써요. 핵심 데이터는 빠지면 해당 기능이 동작하지 않아요.</p>
@@ -60,6 +67,14 @@ ${sec('classes', '강좌 계수 β', `<p>공원 안 올림픽수영장·올림�
 ${sec('tide', '만조·한산한 창 규칙', `<ul><li><strong>만조</strong>: ${hm(R.hi[0] * 10)}~${hm(R.hi[1] * 10)} 점유 예보를 ${R.smooth}구간 이동평균한 곡선의 국소 최대 중, 양쪽으로 자기보다 높은 지점까지의 최소값과의 차(돌출도)가 그날 최대의 ${pct(R.prom, 0)} 이상이고 서로 ${R.win * 10}분 이상 떨어진 것. 높이 순 최대 3개.</li>
 <li><strong>한산한 창</strong>: ${hm(R.low[0] * 10)}~${hm(R.low[1] * 10)}에서 점유 ≤ 그날 최대 × ${R.low_occ} 이고 입차 ≤ 그 시간대 입차 중앙값인 구간이 ${R.low_min * 10}분 이상 이어지는 곳(긴 순 최대 2개).</li>
 <li><strong>밀물 최고</strong>: ${hm(R.arr[0] * 10)}~${hm(R.arr[1] * 10)} 10분 입차 예보가 가장 큰 구간.</li></ul>`)}
+${sec('dispersion', '낮에 덜 붐비는 때와 분산 효과 모델', `<p><strong>낮에 덜 붐비는 때</strong>: ${hm(R.day[0] * 10)}~${hm(R.day[1] * 10)} 점유 예보(3구간 평활)에서 ${R.day_win * 10}분 평균이 가장 낮은 창. 두 번째 창은 겹치지 않고 낮 최고보다 ${(R.day_min_red * 100).toFixed(0)}% 이상 낮을 때만(최대 ${R.day_max}개). 감소율 = 1 − 창 평균 / 낮 최고. 계절 지수는 모든 시각에 같은 배율이라 %에는 영향이 없어요.</p>
+<div class="tbl"><table><caption>요일군별 낮 최고와 덜 붐비는 때(2024-07 프로파일)</caption><thead><tr><th scope="col">요일군</th><th scope="col">낮 최고</th><th scope="col">덜 붐비는 때(낮 최고 대비)</th></tr></thead><tbody>${dtRows}</tbody></table></div>
+<p><strong>낮 시간 분산</strong>: ${esc(DS.day_shift_rule)}. 비율 f만큼 옮기면 기대값은 원래 곡선 + f·(옮긴 곡선 − 원래 곡선)이에요. 보통날 하루하루에 적용해 하루 최고 점유(06~23시)와 만조 직전 10분 최대 입차가 얼마나 줄어드는지 셌어요.</p>
+<div class="tbl"><table><caption>f = 30%일 때(7월 규모, 보통날 중앙값)</caption><thead><tr><th scope="col">요일군</th><th scope="col">옮기는 구간</th><th scope="col" class="n">옮기는 차/일</th><th scope="col" class="n">최고 점유 감소</th><th scope="col" class="n">날 수</th></tr></thead><tbody>${dsRows}</tbody></table></div>
+<p><strong>공연 퇴장 대기</strong>: ${esc(DS.exit_queue.assumption)}. q(t+1) = max(0, q(t) + 도착(t) − c), 대기 차량·분 = Σ q(t). 기준(f=0)은 M대 전부가 0분에 나가려는 경우로, 대기 합계 = M²/(2c)에 가까워요. 비율 f가 S분에 걸쳐 고르게 나가면 그만큼 대기가 줄어요.</p>
+<div class="tbl"><table><caption>행사일별 입력과 결과(나눠 나가는 시간 60분)</caption><thead><tr><th scope="col">행사일</th><th scope="col" class="n">M(30분 최대 출차)</th><th scope="col" class="n">처리량 c(10분 최대)</th><th scope="col" class="n">대기 f=0</th><th scope="col" class="n">대기 f=30%</th></tr></thead><tbody>${qRows}</tbody></table></div>
+<p class="basis">한계: 옮길 의향이 있는 사람이 얼마인지는 데이터로 알 수 없어 사용자가 비율을 고르게 했어요. 처리량은 관측된 최대값이라 실제 출구 용량보다 작을 수 있고(그러면 대기는 과대 추정), 공연 직후 동시 출차 가정은 최악에 가까운 경우예요. 이산화탄소 등 환경 효과로 바꾸지 않았어요(인용할 공식 계수를 확인하지 못함).</p>`)}
+${sec('visit', '편하게 방문하기 출처', V ? `<p>지하철·주차 안내는 ${esc(V.source)}(<a href="${esc(V.url)}" rel="noopener">원문</a>, ${esc(V.retrieved_at)} 확인)에서 옮겼어요: ${V.subway.map((s) => `${s.line}호선 ${esc(s.station)} ${esc(s.exits)}`).join(' · ')}. 대형 행사 때 대중교통 이용 요청 문구와 주차 요금 규칙("${esc(V.parking_rules[0])}" 등)도 같은 페이지예요. 시설별 접근성(경사로·엘리베이터 등)은 확인한 데이터가 없어 안내하지 않아요.</p>` : '<p>방문 안내 정보가 없어요.</p>')}
 ${sec('sari', '사리 시나리오', `<p>저녁 장기입차 E(d) = ${ed.window.join('~')}에 들어와 ${ed.min_dwell_min}분 이상 머문 차. 같은 요일군 중앙값의 1.5배 이상이면 행사 의심일이에요.</p>
 <p>${ed.days.map((d) => `${esc(d.date)} ${d.ratio.toFixed(2)}배(${fmtN(d.count)}대)`).join(' · ')}</p>
 <p class="formula">Δ_g(k) = X_행사일(k) − P_g(k),  F_sari(d,k) = F(d,k) + Δ_g(k − (T − T_ref)/10)</p>
@@ -89,6 +104,12 @@ ${keyRow('공공데이터포털(data.go.kr) 키', M.keys.data_go_kr, '파일데�
 ${keyRow('기상청 단기예보(같은 data.go.kr 키)', M.adapters.weather, '"비 예보 60%" 같은 상황 칩이 보여요(예보 계산에는 넣지 않아요).')}
 ${keyRow('문화공공데이터광장 키', M.keys.culture, '다가오는 공연이 자동으로 채워지고, 2025년 연계 데이터로 예보를 다시 검증해요.')}
 </tbody></table></div><p class="basis">키 값은 저장소·로그·산출물 어디에도 남기지 않아요. 연결 여부만 기록해요.</p>`)}
+${sec('impact', '공익 효과 측정 계획', `<p>이 서비스는 쿠키·추적 스크립트를 쓰지 않아요. GitHub Pages에는 방문 통계가 없으므로, 효과는 아래처럼 개인을 식별하지 않는 집계로만 재요.</p>
+<ul><li><strong>혼잡 분산</strong>: 기관 입출차 원자료(15138735)가 2025년 이후에도 열리면, 서비스 공개 전후 같은 달·요일군의 만조 시간대 입차 비중과 하루 최고 점유를 비교해요(빌드에서 자동 계산 가능).</li>
+<li><strong>실시간 아카이브</strong>: 이 서비스가 쌓는 15분 기록으로 공연일·주말 최고 대비 낮 시간 분포 변화를 공개 CSV로 추적해요.</li>
+<li><strong>이용 규모</strong>: 기관 이관 뒤에는 기관 서버의 접속 로그(일별 페이지 요청 수 합계만, IP 저장 없이)로 셉니다. 이관 전에는 측정하지 않아요.</li>
+<li><strong>데이터 품질 개선</strong>: 기관용 점검은 빌드할 때마다 원자료로 다시 계산되고, 결함이 사라지면 카드가 자동으로 '해결됨'으로 옮겨지며 해결 날짜(resolved_at)를 기록해요. 현재 해결됨 ${resolved}건.</li></ul>
+<p class="basis">수치 목표는 정하지 않았어요. 기준선(2024년 7월)과 같은 정의로 비교할 수 있는 데이터가 열리는 것이 먼저예요(추가 개방 제안 P01).</p>`)}
 ${sec('license', '출처·이용허락', `<div class="tbl"><table><caption>모든 데이터 제공: 한국체육산업개발(주) · 공공데이터포털</caption><thead><tr><th scope="col">ID</th><th scope="col">이름</th><th scope="col">제공기관</th><th scope="col">이용허락</th><th scope="col">기간</th><th scope="col">가져온 방법</th><th scope="col">가져온 시각</th><th scope="col">링크</th></tr></thead><tbody>${lic}</tbody></table></div>
 <p>공휴일: ${esc(hol.source)} (${Object.entries(hol.status).map(([y, s]) => `${y}년 ${esc(s)}`).join(' / ')}). <a href="${esc(hol.source_urls['2027'])}" rel="noopener">원문</a></p>
 <p>코드: MIT 라이선스. 이 서비스는 한국체육산업개발(주)의 공식 서비스가 아니에요. 데이터 기준 ${esc(fmtStamp(M.built_at))}, 모델 ${esc(M.model_version)}.</p>`)}`;

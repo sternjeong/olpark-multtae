@@ -277,6 +277,7 @@ def build(rows, posters, built_at):
                          "top": {WD[w]: pstats[w].most_common(3) for w in (4, 5, 6)}},
         "tide_rules": {"hi": [36, 138], "low": [36, 132], "arr": [30, 138], "win": 9, "prom": 0.1,
                        "low_occ": 0.6, "low_min": 3, "smooth": 3,
+                       "day": [60, 108], "day_win": 6, "day_min_red": 0.1, "day_max": 2,
                        "note": "만조: 3구간 이동평균 곡선의 국소 최대 중 지형 돌출도 ≥ 그날 최대×prom, 서로 win구간 이상 떨어진 것(높이 순 최대 3개)"},
         "weekday_scenario": {"enabled": False, "reason": "근거 1일(2024-07-12), 패턴 불명확"},
         "checks": {"arr_in_month": pk.arr_in_month, "dep_in_month": pk.dep_in_month, "end_occ": pk.end_occ},

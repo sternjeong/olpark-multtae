@@ -1,5 +1,5 @@
 // S7 기관용 데이터 청진기 · 강좌 엇갈림 실험실 · 실시간 아카이브 · 추가 개방 제안
-import { $, esc, fmtN, hm, load, setTitle } from '../app.js';
+import { $, esc, fmtN, hm, koOnlyNote, load, setTitle } from '../app.js';
 import { archiveBlock } from './livepage.js';
 
 const SEV = { high: ['높음', 'hi'], medium: ['보통', 'md'], low: ['낮음', 'lo'] };
@@ -12,7 +12,7 @@ function card(c) {
 <div class="row between"><span class="badge ${SEV[c.severity][1]}">${SEV[c.severity][0]}</span><span class="small muted">${esc(c.id)} · ${esc(c.dataset)}</span></div>
 <h3 id="q-${c.id}">${esc(c.title)}</h3>
 <p class="qnum">${num}</p>
-<dl class="kv"><dt>예</dt><dd>${esc(c.example)}</dd><dt>영향</dt><dd>${esc(c.impact)}</dd><dt>개선 제안</dt><dd>${esc(c.fix)}</dd><dt>기대 효과</dt><dd>${esc(c.benefit)}</dd><dt>근거</dt><dd>${esc(c.finding)}</dd></dl>
+<dl class="kv"><dt>예</dt><dd>${esc(c.example)}</dd><dt>영향</dt><dd>${esc(c.impact)}</dd><dt>개선 제안</dt><dd>${esc(c.fix)}</dd><dt>기대 효과</dt><dd>${esc(c.benefit)}</dd><dt>근거</dt><dd>${esc(c.finding)}</dd><dt>상태</dt><dd>${c.status === 'resolved' ? `해결됨(${esc(c.resolved_at || '')} 확인)` : `열림 · 이 서비스 기록상 ${esc(c.open_since || '')}부터`}</dd></dl>
 <div class="row"><code>${esc(c.repro)}</code><button class="btn ghost" type="button" data-copy="${esc(c.repro)}">재현 명령 복사</button></div>
 </article>`;
 }
@@ -21,7 +21,7 @@ async function viewHome(main) {
   setTitle('기관용 데이터 청진기');
   const Q = await load('quality');
   const open = Q.checks.filter((c) => c.status === 'open'), done = Q.checks.filter((c) => c.status === 'resolved');
-  main.innerHTML = `<h1 tabindex="-1">기관용 · 데이터 청진기</h1>
+  main.innerHTML = `${koOnlyNote()}<h1 tabindex="-1">기관용 · 데이터 청진기</h1>
 <p>${esc(Q.note)} 서비스를 더 잘 만들기 위한 <strong>개선 제안</strong>으로 정리했어요. 각 카드에 근거 숫자, 고칠 방법, 기대 효과, 재현 명령을 붙였어요.</p>
 <div class="tabsel" role="tablist" aria-label="점검 상태"><button role="tab" id="t-open" aria-selected="true" aria-controls="p-q">제안 ${open.length}건</button><button role="tab" id="t-done" aria-selected="false" aria-controls="p-q">해결됨 ${done.length}건</button></div>
 <div id="p-q" role="tabpanel" aria-labelledby="t-open"></div>
@@ -51,7 +51,7 @@ async function viewLab(main) {
   const lab = C.lab, beta = C.beta.value;
   const starts = Object.entries(lab.cap_by_start).map(([m, c]) => [+m, c]).filter(([m, c]) => m >= 300 && m <= 1320 && c >= 1);
   const S = { ...lab.default };
-  main.innerHTML = `${back}<h1 tabindex="-1">강좌 시작 시각을 엇갈리면?</h1>
+  main.innerHTML = `${koOnlyNote()}${back}<h1 tabindex="-1">강좌 시작 시각을 엇갈리면?</h1>
 <section class="card"><div class="stack">
 <label class="row between" for="lab-h"><span>대상 시각</span><select id="lab-h">${starts.map(([m, c]) => `<option value="${m}"${m === S.H ? ' selected' : ''}>${hm(m)} (평일 평균 ${fmtN(c)}석)</option>`).join('')}</select></label>
 <div><label for="lab-f" class="row between"><span>옮길 비율</span><strong id="lab-fv"></strong></label><input type="range" id="lab-f" min="0" max="100" step="10" value="${S.f * 100}"></div>
@@ -90,13 +90,13 @@ async function viewLab(main) {
 async function viewArchive(main) {
   setTitle('실시간 주차 아카이브');
   const [live, Q] = await Promise.all([load('live', { optional: true }), load('quality', { optional: true })]);
-  main.innerHTML = `${back}<h1 tabindex="-1">실시간 주차 아카이브</h1><p>기관 실시간 API는 지금 값 하나만 줘요. 이 서비스가 15분마다 기록해 처음으로 공개 시계열을 쌓고 있어요.</p>${archiveBlock(live, Q)}`;
+  main.innerHTML = `${koOnlyNote()}${back}<h1 tabindex="-1">실시간 주차 아카이브</h1><p>기관 실시간 API는 지금 값 하나만 줘요. 이 서비스가 15분마다 기록해 처음으로 공개 시계열을 쌓고 있어요.</p>${archiveBlock(live, Q)}`;
 }
 
 async function viewProposals(main) {
   setTitle('추가 개방 제안');
   const P = await load('proposals');
-  main.innerHTML = `${back}<h1 tabindex="-1">추가 개방 제안 ${P.items.length}건</h1><p>${esc(P.note)}</p>
+  main.innerHTML = `${koOnlyNote()}${back}<h1 tabindex="-1">추가 개방 제안 ${P.items.length}건</h1><p>${esc(P.note)}</p>
 ${P.items.map((p) => `<article class="card" aria-labelledby="p-${p.id}"><p class="small muted">${esc(p.id)}</p><h2 id="p-${p.id}">${esc(p.title)}</h2>
 <dl class="kv"><dt>우리가 부딪힌 지점</dt><dd>${esc(p.hit)}</dd><dt>열리면</dt><dd>${esc(p.benefit)}</dd><dt>근거</dt><dd>${esc(p.basis.join(', '))}</dd></dl></article>`).join('')}`;
 }

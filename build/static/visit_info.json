@@ -1,0 +1,15 @@
+{
+ "source": "올림픽공원 홈페이지 '오시는 길'",
+ "url": "https://www.ksponco.or.kr/olympicpark/menu.es?mid=a20109000000",
+ "retrieved_at": "2026-11-15",
+ "subway": [
+  {"line": "5", "station": "올림픽공원역", "station_en": "Olympic Park Station", "exits": "3·4번 출구", "exits_en": "Exit 3 or 4"},
+  {"line": "8", "station": "몽촌토성역", "station_en": "Mongchontoseong Station", "exits": "1번 출구", "exits_en": "Exit 1"},
+  {"line": "9", "station": "올림픽공원역", "station_en": "Olympic Park Station", "exits": "3·4번 출구", "exits_en": "Exit 3 or 4"},
+  {"line": "9", "station": "한성백제역", "station_en": "Hanseong Baekje Station", "exits": "2번 출구", "exits_en": "Exit 2"}
+ ],
+ "big_event_notice": "공원 내 대형행사가 개최될 경우 자가 차량 이용 시 주차문제로 인해 이용에 불편함이 발생할 수 있습니다. 반드시 버스, 지하철 등 대중교통을 이용해 주시기 바랍니다.",
+ "big_event_notice_en": "When a large event is held in the park, parking can be difficult. The park asks visitors to use buses or the subway.",
+ "parking_rules": ["10분 이내 출차 시 무료", "경차·장애인·저공해·국가유공자 등 50% 할인", "대형행사 개최 시 선불제·사전정산·일주차권 없음"],
+ "parking_rules_en": ["Free if you leave within 10 minutes", "50% discount for compact cars, disabled drivers, low-emission cars, national merit holders and others", "No prepayment or day passes during large events"]
+}
