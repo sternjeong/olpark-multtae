@@ -125,6 +125,8 @@ def main(argv=None):
     season = model_season.build(normalize.load_monthly(), built_at)
     print("4/9 classes", file=sys.stderr)
     classes, checks, _fit = model_classes.build(class_rows, pk, event_days, today, built_at)
+    profiles["why"] = model_classes.why(profiles, classes)
+    profiles["why"]["dawn"] = {k: checks["dawn_check"][k] for k in ("predicted", "observed", "n_days", "window")}
     print("5/9 backtest", file=sys.stderr)
     bt = backtest.build(pk, event_days, checks, built_at)
     g = bt["methods"]
@@ -178,6 +180,13 @@ def main(argv=None):
                     "15131671": [f"{min(season['years'])}-01", f"{max(season['years'])}-12"],
                     "15149169": [min(x["date"] for x in ev["items"]), ev["latest_date"]]},
         "live_api": config.LIVE_API_URL,
+        "highlights": {
+            "quality_open": sum(1 for c in q["checks"] if c["status"] == "open"),
+            "quality_total": len(q["checks"]),
+            "lab": {k: round(v, 1) if isinstance(v, float) else v for k, v in model_classes.lab_compute(
+                classes["lab"], classes["beta"]["value"], **{"H": classes["lab"]["default"]["H"], "f": classes["lab"]["default"]["f"],
+                                                             "delta": classes["lab"]["default"]["delta"]}).items()},
+        },
         "warnings": warnings,
     }
     print("9/9 write + validate", file=sys.stderr)

@@ -14,7 +14,8 @@
   "weekday_scenario",
   "daytime",
   "dispersion",
-  "tide_rules"
+  "tide_rules",
+  "why"
  ],
  "properties": {
   "schema": {
@@ -640,6 +641,18 @@
      ]
     }
    }
+  },
+  "why": {
+   "type": "object",
+   "required": [
+    "beta",
+    "se",
+    "dawn",
+    "weekday",
+    "sat",
+    "sun"
+   ],
+   "additionalProperties": {}
   }
  }
 }

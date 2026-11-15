@@ -252,3 +252,13 @@ input:focus-visible, input:focus-within, select:focus-visible { outline: 3px sol
 .panel-t { flex-wrap: wrap; row-gap: 0; } .panel-t > .small { order: 3; flex-basis: 100%; font-weight: 400; }
 @media (max-width: 480px) { :root[data-large="1"] .keys2 { grid-template-columns: 1fr; } }
 .tap { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.why { margin-top: var(--sp-3); padding: var(--sp-3); border-left: 4px solid var(--accent); background: var(--bg); border-radius: 0 var(--r-btn) var(--r-btn) 0; }
+.why h3 { margin: 0 0 var(--sp-1); font-size: 1rem; }
+.why p { margin: 0 0 var(--sp-1); font-size: var(--fs-small); }
+.why .row { gap: var(--sp-3); }
+.orgcard { display: flex; flex-direction: column; gap: 2px; text-decoration: none; color: var(--text); border-color: var(--line); min-height: 44px; }
+.orgcard strong { font-size: 1rem; line-height: 1.4; }
+.orgcard .small:last-child { color: var(--primary); font-weight: 700; }
+.intro { justify-content: space-between; flex-wrap: nowrap; align-items: flex-start; border: 1px solid var(--primary); border-radius: var(--r-card); background: var(--surface); padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3); margin-bottom: var(--sp-3); }
+.intro p { margin: 0; font-size: var(--fs-small); }
+a, button, input, select, summary, [tabindex] { scroll-margin-bottom: 88px; scroll-margin-top: 72px; }

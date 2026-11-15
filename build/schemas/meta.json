@@ -9,7 +9,8 @@
   "model_version",
   "keys",
   "sources",
-  "warnings"
+  "warnings",
+  "highlights"
  ],
  "properties": {
   "schema": {
@@ -108,6 +109,14 @@
    "items": {
     "type": "string"
    }
+  },
+  "highlights": {
+   "type": "object",
+   "required": [
+    "quality_open",
+    "quality_total",
+    "lab"
+   ]
   }
  }
 }

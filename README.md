@@ -54,8 +54,8 @@ python3 -m http.server 8000 --directory site        # http://localhost:8000/ 에
 ## 자동화(GitHub Actions)
 | 워크플로 | 주기 | 하는 일 |
 |---|---|---|
-| `build-deploy.yml` | main 푸시 · 매시 7분 · 수동 | 빌드 → 테스트 → GitHub Pages 배포 |
-| `collect-live.yml` | 15분마다 | 실시간 주차 값을 `archive` 브랜치 `live/parking_YYYY-MM.csv`에 기록(브랜치가 없으면 만듦) |
+| `build-deploy.yml` | main 푸시 · 매시 23분 · 수동 | 빌드 → 테스트 → GitHub Pages 배포 |
+| `collect-live.yml` | 15분마다(매시 4·19·34·49분) | 실시간 주차 값을 `archive` 브랜치 `live/parking_YYYY-MM.csv`에 기록(브랜치가 없으면 만듦) |
 | `refresh-sources.yml` | 매주 월 03:00 KST | 원천 재다운로드 → 바뀌었고 테스트 통과면 PR, 실패면 이슈 |
 | `keepalive.yml` | 매월 1일 | 60일 무활동으로 예약 실행이 꺼지지 않게 기록 |
 | `ci.yml` | PR | 오프라인 빌드 + 테스트 |

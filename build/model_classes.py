@@ -191,3 +191,54 @@ def build(all_rows, pk, event_days, ref, built_at):
         "classes": sorted(items, key=lambda x: (x["start"], -x["cap"])),
     }
     return out, checks, fit
+
+
+WHY_DAYS = {"weekday": [0, 1, 2, 3, 4], "sat": [5], "sun": [6]}
+WHY_MIN_SHARE = 0.10   # 만조 직전 1시간 강좌 몫이 이보다 작으면 '강좌 영향이 작다'고 쓴다
+
+
+def why(profiles, classes):
+    """홈 '왜 이 시각에 차오를까?' 줄의 숫자. 기준일 시간표(on_ref) 강좌의 요일군 평균 시작 수요 S_g(k)와
+    2024-07 요일군 입차 프로파일 A_g(k)로 강좌 몫 = Σ min(β·S, A) / Σ A 를 계산한다(계절 지수는 양쪽에 같아 비율에 영향 없음)."""
+    from . import tide
+    beta = classes["beta"]["value"]
+    on = [c for c in classes["classes"] if c["on_ref"]]
+    out = {"beta": beta, "se": classes["beta"]["se"], "ref_date": classes["ref_date"], "min_share": WHY_MIN_SHARE,
+           "rule": "강좌 몫 = Σ min(β·S_g, A_g) / Σ A_g. S_g = 기준일 유효 강좌의 시작 전 30분 수요(요일군 평균), A_g = 2024-07 요일군 입차"}
+    for g, days in WHY_DAYS.items():
+        S = [0.0] * B
+        starts = [collections.Counter() for _ in range(B)]
+        for w in days:
+            for c in on:
+                if w in c["days"]:
+                    b = c["start"] // 10
+                    for j in range(1, config.ARRIVAL_LEAD_BINS + 1):
+                        if b - j >= 0:
+                            S[b - j] += c["cap"] / 3 / len(days)
+                            starts[b - j][c["start"]] += c["cap"] / len(days)
+        G = profiles["groups"][g]
+        A = G["arr"]
+        his = tide.high_tides(G["occ"])
+        kh = max(his, key=lambda k: G["occ"][k])
+        P = range(kh - 6, kh)
+        contrib = [min(beta * S[k], A[k]) for k in range(B)]
+        p_share = sum(contrib[k] for k in P) / sum(A[k] for k in P)
+        pa = tide.peak_arrival(A)
+        # 강좌 몫이 가장 큰 '물결': 입차가 하루 최고의 50% 이상인 05~23시 구간 중 강좌 기여(대)가 가장 큰 곳(새벽 제외는 하지 않음)
+        amax = max(A[30:138])
+        cand = [k for k in range(36, 138) if A[k] >= 0.5 * amax]
+        top = max(cand, key=lambda k: contrib[k])
+        mode = lambda k: (starts[k].most_common(1)[0][0] if starts[k] else None)
+        seats = lambda k: round(sum(starts[k].values()))  # 시작 시각이 k+1..k+3 구간인 강좌 정원(요일 평균)
+        hh = kh * 10 // 60
+        out[g] = {
+            "high_k": kh, "p_bins": [kh - 6, kh], "p_share": round(p_share, 3),
+            "p_class_cars": round(sum(contrib[k] for k in P), 1), "p_arr_cars": round(sum(A[k] for k in P), 1),
+            "short_share_high_hour": profiles["short_stop_share"][hh],
+            "peak_k": pa, "peak_share": round(contrib[pa] / A[pa], 3), "peak_class_cars": round(contrib[pa], 1),
+            "peak_arr": round(A[pa], 1), "peak_start": mode(pa), "peak_seats": seats(pa),
+            "top_k": top, "top_share": round(contrib[top] / A[top], 3), "top_class_cars": round(contrib[top], 1),
+            "top_start": mode(top),
+            "classes_matter": p_share >= WHY_MIN_SHARE,
+        }
+    return out

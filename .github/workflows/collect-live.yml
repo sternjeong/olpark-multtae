@@ -2,7 +2,7 @@ name: collect-live
 # 15분마다 기관 실시간 주차 API 값을 archive 브랜치(고아 브랜치)의 live/parking_YYYY-MM.csv에 기록
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "4,19,34,49 * * * *"
   workflow_dispatch:
 permissions:
   contents: write

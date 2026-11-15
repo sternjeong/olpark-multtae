@@ -19,7 +19,7 @@ const KO = /*I18N-KO*/{
   "nf.title": "물이 닿지 않는 곳이에요", "nf.body": "찾는 화면이 없어요. 주소를 확인해 주세요.", "nf.go": "오늘의 물때로 가기", "nf.doc": "없는 화면",
   "range.title": "이 날짜는 보여 드리지 않아요", "range.body": "오늘부터 앞으로 60일, 지난 7일까지 볼 수 있어요.", "range.go": "오늘로 가기", "range.goWeek": "이번 주로 가기",
   "today.doc": "오늘의 물때", "today.docDate": "{d} 물때", "today.prefix": "오늘 · ",
-  "today.intro": "<strong>올림픽공원에도 물때가 있어요.</strong> 언제 차오르고 언제 빠지는지, 그리고 왜 그런지 기관 데이터로 보여 드려요.", "today.introOk": "알겠어요",
+  "today.intro": "<strong>붐비는 시각뿐 아니라 '왜' 붐비는지까지.</strong> 공원 안 강좌 시간표와 입출차 21만 건을 엮어 보여 드려요.", "today.introOk": "알겠어요",
   "today.prev": "전날", "today.next": "다음 날", "today.pick": "날짜 고르기",
   "today.holidayChip": "{h} · 일요일처럼 봐요", "today.idx": "{m}월 지수 {s}",
   "today.summary": "오늘의 물때 요약",
@@ -97,7 +97,19 @@ const KO = /*I18N-KO*/{
   "lp.tblCap": "최근 기록(15분 간격, 최근 48개)", "lp.tblVal": "주차 대수", "lp.start": "수집 시작", "lp.none": "아직 없음", "lp.count": "기록 수", "lp.countV": "{n}건", "lp.fail": " · 실패 비율 {p}%",
   "lp.unit": "이 값은 장기주차 차량이 포함될 수 있어 2024년 원자료 곡선보다 크게 나와요{r}. 그래서 물때 곡선과 겹쳐 그리지 않고, 이 서비스가 쌓은 같은 요일·시각 기록하고만 비교해요.",
   "lp.ratio": "(같은 요일·시각 약 {r}배, {b} 기준)", "lp.csv": "기록 내려받기 (CSV)",
-  "lp.csvNote": "이 CSV는 이 서비스가 기관 실시간 API를 15분마다 기록한 것이에요. 자유롭게 쓰세요(출처: 한국체육산업개발 실시간 주차현황)."
+  "lp.csvNote": "이 CSV는 이 서비스가 기관 실시간 API를 15분마다 기록한 것이에요. 자유롭게 쓰세요(출처: 한국체육산업개발 실시간 주차현황).",
+  "why.title": "왜 이 시각에 차오를까?",
+  "why.high": "만조 {h} 직전 1시간 입차의 약 <strong>{p}%</strong>는 공원 안 스포츠센터·수영장 강좌 시작 때문이에요.",
+  "why.peak": "밀물 최고 {t}의 약 <strong>{p}%(약 {n}대)</strong>는 {s} 시작 강좌 정원 약 {seats}석으로 설명돼요.",
+  "why.highSmall": "{g} 만조 {h} 무렵은 강좌보다 일반 방문이 만들어요(강좌 몫 약 {p}%). 그 시각 입차의 {q}%는 10분 안에 나가요.",
+  "why.contrast": "강좌 영향은 평일 아침에 커요: 평일 {t} 물결의 약 <strong>{p}%</strong>.",
+  "why.open": "{t} 물결 해부 보기",
+  "why.openHigh": "{t} 만조 자세히",
+  "why.weekday": "평일 {t} 보기",
+  "why.basis": "근거: 2024-07 입차 × 강좌 계수 β {b}(±{se}) · 새벽 검증 {dp} vs 실제 {do}대",
+  "org.title": "운영기관이라면",
+  "org.text": "개방 데이터 개선 제안 {n}건 · 강좌 시작 시간 분산 실험({a}→{b}대)",
+  "org.go": "기관용 데이터 청진기 열기"
 }/*/I18N-KO*/;
 let DICT = KO;
 export let LANG = 'ko';
@@ -116,7 +128,8 @@ async function setLang(lang) {
 /* ---------------- 공통 유틸 ---------------- */
 export const $ = (s, r = document) => r.querySelector(s);
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export const fmtN = (n) => Math.round(n).toLocaleString('ko-KR');
+const NF = new Intl.NumberFormat('ko-KR');
+export const fmtN = (n) => NF.format(Math.round(n));
 export const pad = (n) => String(n).padStart(2, '0');
 export const hm = (m) => { m = ((Math.round(m) % 1440) + 1440) % 1440; return `${pad(Math.floor(m / 60))}:${pad(m % 60)}`; };
 export const hmKo = (m) => { if (LANG === 'en') return hm(m); m = ((Math.round(m) % 1440) + 1440) % 1440; const h = Math.floor(m / 60), mi = m % 60; return mi ? `${h}시 ${mi}분` : `${h}시`; };
@@ -533,7 +546,7 @@ async function viewToday(main, path, qs, dateParam) {
   const S = { sariT: null, cursor: null, open: {} };
   if (ov && q.show && /^\d{4}$/.test(q.show)) { const x = +q.show.slice(0, 2) * 60 + +q.show.slice(2); if (x >= 720 && x <= 1260) S.sariT = x; }
   S.panelOpen = S.sariT != null;
-  const intro = store.get('intro') ? '' : `<div class="card intro" id="intro"><p>${t('today.intro')}</p><button class="btn ghost" type="button" id="intro-x">${t('today.introOk')}</button></div>`;
+  const intro = store.get('intro') ? '' : `<div class="intro row" id="intro"><p>${t('today.intro')}</p><button class="iconbtn" type="button" id="intro-x" aria-label="${t('today.introOk')}">${icon('close', 18)}</button></div>`;
   const minD = addDays(today, -7), maxD = addDays(today, 60);
   const hid = ' aria-disabled="true" tabindex="-1" style="visibility:hidden"';
   main.innerHTML = `${intro}
@@ -544,7 +557,8 @@ async function viewToday(main, path, qs, dateParam) {
 </div>
 <div class="datepick"><span class="chip">${fc.holiday ? t('today.holidayChip', { h: LANG === 'en' ? 'Holiday' : esc(fc.holiday) }) : gName(fc.g)} · ${t('today.idx', { m: fc.m, s: fc.s.toFixed(2) })}</span>
   <label class="row small"><span class="sr-only">${t('today.pick')}</span><input type="date" id="pick" value="${iso}" min="${minD}" max="${maxD}" aria-label="${t('today.pick')}"></label></div>
-<section class="card" aria-labelledby="k-t"><h2 id="k-t" class="sr-only">${t('today.summary')}</h2><div class="keys" id="keys"></div><div id="dayq"></div><p class="basis">${esc(BASIS(D, fc))} · <a href="./#/method/season">${t('ui.method')}</a></p></section>
+<section class="card" aria-labelledby="k-t"><h2 id="k-t" class="sr-only">${t('today.summary')}</h2><div class="keys" id="keys"></div><div id="why" class="why"></div><div id="dayq"></div><p class="basis">${esc(BASIS(D, fc))} · <a href="./#/method/season">${t('ui.method')}</a></p></section>
+<a class="card orgcard" href="./#/org" id="orgcard"></a>
 <div id="live"></div>
 <section class="card" aria-labelledby="c-t">
   <div class="row between"><h2 id="c-t">${t('chart.title')}</h2><span class="small muted">${t('chart.range')}</span></div>
@@ -702,6 +716,27 @@ ${st ? `<p class="small">${t('sari.transit', { s: esc(st) })}</p>` : ''}
     if (!S.open.disp) $('#disp').innerHTML = panelBtn('disp', t('disp.title'), t('disp.sub'), false) + '<div id="disp-b"></div>';
     bindPanels();
   };
+
+  // 왜 이 시각에 차오를까?(첫 화면 데이터만 사용: profiles.why, meta.highlights)
+  const W = D.profiles.why, wg = W[fc.g];
+  if (wg) {
+    const pc = (x) => Math.round(x * 100);
+    let body;
+    if (wg.classes_matter) {
+      body = `<p>${t('why.high', { h: hm(wg.high_k * 10), p: pc(wg.p_share) })}</p><p>${t('why.peak', { t: hm(wg.peak_k * 10), p: pc(wg.peak_share), n: fmtN(wg.peak_class_cars * fc.s), s: hm(wg.peak_start), seats: fmtN(wg.peak_seats) })}</p>
+<p class="row"><button type="button" class="linkbtn" data-k="${wg.peak_k}">${t('why.open', { t: hm(wg.peak_k * 10) })}</button></p>`;
+    } else {
+      const wd = W.weekday;
+      let nx = iso; for (let i = 1; i < 8; i++) { const d = addDays(iso, i); if (wdOf(d) < 5 && !D.holidays.dates[d] && diffDays(d, today) <= 60) { nx = d; break; } }
+      body = `<p>${t('why.highSmall', { g: gName(fc.g), h: hm(wg.high_k * 10), p: pc(wg.p_share), q: pc(wg.short_share_high_hour) })}</p><p>${t('why.contrast', { t: hm(wd.peak_k * 10), p: pc(wd.peak_share) })}</p>
+<p class="row"><button type="button" class="linkbtn" data-k="${wg.high_k}">${t('why.openHigh', { t: hm(wg.high_k * 10) })}</button>${nx !== iso ? ` <a class="tap" href="./#/day/${nx}?t=${hm(wd.peak_k * 10).replace(':', '')}">${t('why.weekday', { t: hm(wd.peak_k * 10) })}</a>` : ''}</p>`;
+    }
+    $('#why').innerHTML = `<h3>${t('why.title')}</h3>${body}<p class="basis">${t('why.basis', { b: W.beta.toFixed(3), se: W.se.toFixed(3), dp: fmtN(W.dawn.predicted), do: fmtN(W.dawn.observed) })} · <a href="./#/method/classes">${t('ui.method')}</a></p>`;
+    $('#why').querySelectorAll('[data-k]').forEach((b) => b.addEventListener('click', () => { const k = +b.dataset.k; S.chart.set(k); openWave(k); }));
+  }
+  const HL = D.meta.highlights;
+  if (HL) $('#orgcard').innerHTML = `<span class="small muted">${t('org.title')}</span><strong>${t('org.text', { n: HL.quality_open, a: fmtN(HL.lab.before), b: fmtN(HL.lab.after) })}</strong><span class="small">${t('org.go')} ›</span>`;
+  else $('#orgcard').remove();
 
   // 상황 칩(§6.9, F10)
   const chips = [];
