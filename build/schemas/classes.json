@@ -1,0 +1,147 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "classes",
+ "type": "object",
+ "required": [
+  "schema",
+  "built_at",
+  "datasets",
+  "latest_month",
+  "zombie_rule",
+  "zombie_excluded",
+  "beta",
+  "lab",
+  "classes"
+ ],
+ "properties": {
+  "schema": {
+   "type": "string",
+   "enum": [
+    "classes/1"
+   ]
+  },
+  "built_at": {
+   "type": "string",
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\+09:00$"
+  },
+  "beta": {
+   "type": "object",
+   "required": [
+    "value",
+    "se",
+    "n",
+    "window",
+    "arrival_lead_min",
+    "method",
+    "fit_period"
+   ],
+   "properties": {
+    "value": {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 1
+    },
+    "se": {
+     "type": "number",
+     "minimum": 0
+    },
+    "n": {
+     "type": "integer",
+     "minimum": 1
+    }
+   }
+  },
+  "lab": {
+   "type": "object",
+   "required": [
+    "abar",
+    "sbar",
+    "cap_by_start",
+    "default"
+   ],
+   "properties": {
+    "abar": {
+     "type": "array",
+     "minItems": 144,
+     "maxItems": 144,
+     "items": {
+      "type": "number"
+     }
+    },
+    "sbar": {
+     "type": "array",
+     "minItems": 144,
+     "maxItems": 144,
+     "items": {
+      "type": "number"
+     }
+    }
+   }
+  },
+  "classes": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "center",
+     "sport",
+     "name",
+     "start",
+     "end",
+     "days",
+     "cap",
+     "valid",
+     "on_ref",
+     "url"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "pattern": "^[SC]-"
+     },
+     "start": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1439
+     },
+     "end": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1440
+     },
+     "days": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 7,
+      "items": {
+       "type": "integer",
+       "minimum": 0,
+       "maximum": 6
+      }
+     },
+     "cap": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "valid": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+       "type": "string",
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      }
+     },
+     "on_ref": {
+      "type": "boolean"
+     },
+     "url": {
+      "type": "string",
+      "pattern": "^https://"
+     }
+    }
+   }
+  }
+ }
+}

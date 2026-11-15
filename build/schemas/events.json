@@ -1,0 +1,78 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "events",
+ "type": "object",
+ "required": [
+  "schema",
+  "built_at",
+  "source",
+  "date_semantics",
+  "latest_date",
+  "items"
+ ],
+ "properties": {
+  "schema": {
+   "type": "string",
+   "enum": [
+    "events/1"
+   ]
+  },
+  "built_at": {
+   "type": "string",
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\+09:00$"
+  },
+  "source": {
+   "type": "string",
+   "enum": [
+    "15149169",
+    "kcisa-3037877"
+   ]
+  },
+  "date_semantics": {
+   "type": "string",
+   "enum": [
+    "uncertain",
+    "event_start"
+   ]
+  },
+  "latest_date": {
+   "type": "string",
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+  },
+  "items": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "title",
+     "date",
+     "url",
+     "venue",
+     "start_time"
+    ],
+    "properties": {
+     "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+     },
+     "title": {
+      "type": "string"
+     },
+     "venue": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "start_time": {
+      "type": [
+       "string",
+       "null"
+      ]
+     }
+    }
+   }
+  }
+ }
+}

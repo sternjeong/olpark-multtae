@@ -1,0 +1,43 @@
+name: collect-live
+# 15분마다 기관 실시간 주차 API 값을 archive 브랜치(고아 브랜치)의 live/parking_YYYY-MM.csv에 기록
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: collect-live
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: archive 브랜치 준비(없으면 고아 브랜치 생성)
+        run: |
+          git config user.name "olpark-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin archive >/dev/null 2>&1; then
+            git fetch --depth 1 origin archive
+            git worktree add arc origin/archive
+            cd arc && git checkout -B archive
+          else
+            git worktree add --detach arc
+            cd arc && git checkout --orphan archive && git rm -rf . >/dev/null && mkdir -p live
+            printf '# archive\n올팍 물때 실시간 주차 기록(15분 간격). 출처: 한국체육산업개발 실시간 주차현황(15168686).\n' > README.md
+          fi
+      - name: 수집
+        run: python3 -m build.live collect --archive arc/live
+      - name: 커밋·푸시
+        run: |
+          cd arc
+          git add -A
+          if git diff --cached --quiet; then echo "변화 없음"; exit 0; fi
+          git commit -m "live: $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do git push origin archive && exit 0; git pull --rebase origin archive || true; done
+          exit 1

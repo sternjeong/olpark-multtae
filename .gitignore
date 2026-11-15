@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+work/
+archive/
+arc/
+site/data/live.json
+site/data/live_archive.csv
+.DS_Store

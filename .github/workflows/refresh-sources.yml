@@ -1,0 +1,65 @@
+name: refresh-sources
+# 매주 월 03:00 KST: 포털 무키(또는 odcloud) 다운로드 → 바뀌었고 테스트 통과면 PR, 실패면 이슈
+on:
+  schedule:
+    - cron: "0 18 * * 0"
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 원천 받기
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: python3 -m build.fetch
+      - name: 스냅숏 승격
+        id: promote
+        run: |
+          out=$(python3 -m build.fetch --promote)
+          echo "changed=$out" >> "$GITHUB_OUTPUT"
+          cat work/sources.json
+      - name: 테스트
+        id: test
+        if: steps.promote.outputs.changed != 'no-change'
+        continue-on-error: true
+        run: |
+          python3 -m build.main --out site/data --offline
+          python3 -m unittest discover -s tests 2>&1 | tee test.log
+      - name: PR 만들기
+        if: steps.promote.outputs.changed != 'no-change' && steps.test.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          br="refresh/$(date -u +%Y%m%d)"
+          git config user.name "olpark-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$br"
+          git add data/raw site/data
+          git commit -m "data: 원천 스냅숏 갱신 (${{ steps.promote.outputs.changed }})"
+          git push origin "$br"
+          gh pr create --title "원천 데이터 갱신: ${{ steps.promote.outputs.changed }}" --body "refresh-sources 워크플로가 바뀐 원천 파일을 받아 테스트를 통과했어요. 숫자 변화를 확인하고 병합해 주세요."
+      - name: 이슈 만들기(테스트 실패)
+        if: steps.promote.outputs.changed != 'no-change' && steps.test.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          { echo "바뀐 데이터셋: ${{ steps.promote.outputs.changed }}"; echo; echo '```'; tail -n 60 test.log; echo '```'; echo; echo '```json'; cat work/sources.json; echo '```'; } > body.md
+          gh issue create --title "원천 갱신 후 테스트 실패 ($(date -u +%Y-%m-%d))" --body-file body.md
+      - name: 이슈 만들기(다운로드 실패)
+        if: always() && hashFiles('work/sources.json') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if grep -q 'portal_fetch_failed' work/sources.json; then
+            { echo "포털 무키 다운로드가 실패한 데이터셋이 있어요. 서비스는 커밋된 스냅숏으로 계속 동작해요."; echo; echo '```json'; cat work/sources.json; echo '```'; } > fail.md
+            gh issue create --title "원천 다운로드 실패 ($(date -u +%Y-%m-%d))" --body-file fail.md
+          fi

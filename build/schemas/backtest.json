@@ -1,0 +1,63 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "backtest",
+ "type": "object",
+ "required": [
+  "schema",
+  "built_at",
+  "split",
+  "methods",
+  "mean_hourly_arrivals_test",
+  "class_checks"
+ ],
+ "properties": {
+  "schema": {
+   "type": "string",
+   "enum": [
+    "backtest/1"
+   ]
+  },
+  "built_at": {
+   "type": "string",
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\+09:00$"
+  },
+  "methods": {
+   "type": "object",
+   "required": [
+    "flat",
+    "single",
+    "group"
+   ],
+   "properties": {
+    "group": {
+     "type": "object",
+     "required": [
+      "mae10",
+      "mae60",
+      "ape_day",
+      "peak_hour_match"
+     ]
+    }
+   }
+  },
+  "class_checks": {
+   "type": "object",
+   "required": [
+    "r_hourly",
+    "r_weekday_diff",
+    "pre_hour_ratio",
+    "dawn_check"
+   ],
+   "properties": {
+    "dawn_check": {
+     "type": "object",
+     "required": [
+      "predicted",
+      "observed",
+      "n_days"
+     ]
+    }
+   }
+  }
+ }
+}

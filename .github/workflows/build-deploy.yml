@@ -1,0 +1,56 @@
+name: build-deploy
+# main 푸시·매시 7분·수동 실행 → 오프라인 빌드(스냅숏 + archive 브랜치 실시간 기록) → 테스트 → GitHub Pages 배포
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: archive 브랜치 가져오기(없으면 건너뜀)
+        run: |
+          if git ls-remote --exit-code --heads origin archive >/dev/null 2>&1; then
+            git fetch --depth 1 origin archive
+            git worktree add archive origin/archive
+          else
+            echo "archive 브랜치가 아직 없어요 — 실시간 기록 없이 빌드합니다."
+            mkdir -p archive/live
+          fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 빌드(키 secret이 있으면 어댑터만 켜짐)
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          CULTURE_API_KEY: ${{ secrets.CULTURE_API_KEY }}
+        run: python3 -m build.main --out site/data --archive archive/live --offline
+      - name: 테스트
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          CULTURE_API_KEY: ${{ secrets.CULTURE_API_KEY }}
+        run: python3 -m unittest discover -s tests
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

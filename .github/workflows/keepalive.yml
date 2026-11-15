@@ -1,0 +1,19 @@
+name: keepalive
+# 공개 저장소는 60일 동안 활동이 없으면 예약 실행이 꺼진다 → 매월 1일 main에 날짜를 기록
+on:
+  schedule:
+    - cron: "0 0 1 * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          date -u +%Y-%m-%dT%H:%MZ > .github/keepalive
+          git config user.name "olpark-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/keepalive
+          git commit -m "chore: keepalive" && git push || echo "변화 없음"

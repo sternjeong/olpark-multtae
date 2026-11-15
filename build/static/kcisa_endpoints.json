@@ -1,0 +1,6 @@
+{
+ "_note": "culture.go.kr 접속이 막혀 엔드포인트를 확인하지 못했다. 키를 받은 사람이 문화공공데이터광장 명세를 보고 채운다. 비어 있으면 어댑터는 건너뛴다.",
+ "3037877": {"url": "", "params": {}, "key_param": "serviceKey", "item_tag": "item", "field_map": {}},
+ "15164822": {"url": "", "params": {}, "key_param": "serviceKey", "item_tag": "item", "field_map": {}},
+ "15159093": {"url": "", "params": {}, "key_param": "serviceKey", "item_tag": "item", "field_map": {}}
+}

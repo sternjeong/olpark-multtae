@@ -1,0 +1,582 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "profiles",
+ "type": "object",
+ "required": [
+  "schema",
+  "built_at",
+  "basis",
+  "groups",
+  "short_stop_share",
+  "dwell_hist",
+  "event_detection",
+  "event_overlay",
+  "weekday_scenario"
+ ],
+ "properties": {
+  "schema": {
+   "type": "string",
+   "enum": [
+    "profiles/1"
+   ]
+  },
+  "built_at": {
+   "type": "string",
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\+09:00$"
+  },
+  "basis": {
+   "type": "object",
+   "required": [
+    "dataset",
+    "period",
+    "event_days",
+    "occupancy_excluded",
+    "bin_minutes"
+   ],
+   "properties": {
+    "event_days": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+     }
+    },
+    "bin_minutes": {
+     "type": "integer",
+     "enum": [
+      10
+     ]
+    }
+   }
+  },
+  "groups": {
+   "type": "object",
+   "required": [
+    "weekday",
+    "sat",
+    "sun"
+   ],
+   "properties": {
+    "weekday": {
+     "type": "object",
+     "required": [
+      "n_days",
+      "n_days_occ",
+      "arr",
+      "dep",
+      "occ",
+      "occ_lo",
+      "occ_hi",
+      "band",
+      "smoothed"
+     ],
+     "properties": {
+      "n_days": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "n_days_occ": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "arr": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "dep": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "occ": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "occ_lo": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "occ_hi": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "band": {
+       "type": "string",
+       "enum": [
+        "p25-p75",
+        "min-max"
+       ]
+      },
+      "smoothed": {
+       "type": "boolean"
+      }
+     }
+    },
+    "sat": {
+     "type": "object",
+     "required": [
+      "n_days",
+      "n_days_occ",
+      "arr",
+      "dep",
+      "occ",
+      "occ_lo",
+      "occ_hi",
+      "band",
+      "smoothed"
+     ],
+     "properties": {
+      "n_days": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "n_days_occ": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "arr": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "dep": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "occ": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "occ_lo": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "occ_hi": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "band": {
+       "type": "string",
+       "enum": [
+        "p25-p75",
+        "min-max"
+       ]
+      },
+      "smoothed": {
+       "type": "boolean"
+      }
+     }
+    },
+    "sun": {
+     "type": "object",
+     "required": [
+      "n_days",
+      "n_days_occ",
+      "arr",
+      "dep",
+      "occ",
+      "occ_lo",
+      "occ_hi",
+      "band",
+      "smoothed"
+     ],
+     "properties": {
+      "n_days": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "n_days_occ": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "arr": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "dep": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "occ": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "occ_lo": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "occ_hi": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "band": {
+       "type": "string",
+       "enum": [
+        "p25-p75",
+        "min-max"
+       ]
+      },
+      "smoothed": {
+       "type": "boolean"
+      }
+     }
+    }
+   }
+  },
+  "short_stop_share": {
+   "type": "array",
+   "minItems": 24,
+   "maxItems": 24,
+   "items": {
+    "type": "number",
+    "minimum": 0,
+    "maximum": 1
+   }
+  },
+  "dwell_hist": {
+   "type": "object",
+   "required": [
+    "edges_min",
+    "share"
+   ],
+   "properties": {
+    "share": {
+     "type": "array",
+     "minItems": 8,
+     "maxItems": 8,
+     "items": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+     }
+    }
+   }
+  },
+  "event_detection": {
+   "type": "object",
+   "required": [
+    "rule",
+    "window",
+    "min_dwell_min",
+    "days"
+   ],
+   "properties": {
+    "days": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "date",
+       "ratio",
+       "count"
+      ],
+      "properties": {
+       "date": {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+       },
+       "ratio": {
+        "type": "number",
+        "minimum": 1.5
+       }
+      }
+     }
+    }
+   }
+  },
+  "event_overlay": {
+   "type": "object",
+   "properties": {
+    "sat": {
+     "type": "object",
+     "required": [
+      "source_day",
+      "ref_start",
+      "ref_start_candidates",
+      "ref_rule",
+      "d_arr",
+      "d_dep",
+      "d_occ",
+      "peak_occ",
+      "normal_peak_occ",
+      "offsets_min",
+      "exit_peak_10min",
+      "exit_max_30min"
+     ],
+     "properties": {
+      "source_day": {
+       "type": "string",
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      "ref_start": {
+       "type": "string",
+       "pattern": "^\\d{2}:\\d{2}$"
+      },
+      "ref_start_candidates": {
+       "type": "array",
+       "items": {
+        "type": "string",
+        "pattern": "^\\d{2}:\\d{2}$"
+       }
+      },
+      "ref_rule": {
+       "type": "string"
+      },
+      "d_arr": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "d_dep": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "d_occ": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "peak_occ": {
+       "type": "number",
+       "minimum": 0
+      },
+      "normal_peak_occ": {
+       "type": "number",
+       "minimum": 0
+      },
+      "offsets_min": {
+       "type": "object",
+       "required": [
+        "rush_start",
+        "rush_end",
+        "exit_peak",
+        "clear"
+       ],
+       "properties": {
+        "rush_start": {
+         "type": "integer",
+         "minimum": -600,
+         "maximum": 600
+        },
+        "rush_end": {
+         "type": "integer",
+         "minimum": -600,
+         "maximum": 600
+        },
+        "exit_peak": {
+         "type": "integer",
+         "minimum": -600,
+         "maximum": 600
+        },
+        "clear": {
+         "type": "integer",
+         "minimum": -600,
+         "maximum": 600
+        }
+       }
+      },
+      "exit_peak_10min": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "exit_max_30min": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    },
+    "sun": {
+     "type": "object",
+     "required": [
+      "source_day",
+      "ref_start",
+      "ref_start_candidates",
+      "ref_rule",
+      "d_arr",
+      "d_dep",
+      "d_occ",
+      "peak_occ",
+      "normal_peak_occ",
+      "offsets_min",
+      "exit_peak_10min",
+      "exit_max_30min"
+     ],
+     "properties": {
+      "source_day": {
+       "type": "string",
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      "ref_start": {
+       "type": "string",
+       "pattern": "^\\d{2}:\\d{2}$"
+      },
+      "ref_start_candidates": {
+       "type": "array",
+       "items": {
+        "type": "string",
+        "pattern": "^\\d{2}:\\d{2}$"
+       }
+      },
+      "ref_rule": {
+       "type": "string"
+      },
+      "d_arr": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "d_dep": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "d_occ": {
+       "type": "array",
+       "minItems": 144,
+       "maxItems": 144,
+       "items": {
+        "type": "number"
+       }
+      },
+      "peak_occ": {
+       "type": "number",
+       "minimum": 0
+      },
+      "normal_peak_occ": {
+       "type": "number",
+       "minimum": 0
+      },
+      "offsets_min": {
+       "type": "object",
+       "required": [
+        "rush_start",
+        "rush_end",
+        "exit_peak",
+        "clear"
+       ],
+       "properties": {
+        "rush_start": {
+         "type": "integer",
+         "minimum": -600,
+         "maximum": 600
+        },
+        "rush_end": {
+         "type": "integer",
+         "minimum": -600,
+         "maximum": 600
+        },
+        "exit_peak": {
+         "type": "integer",
+         "minimum": -600,
+         "maximum": 600
+        },
+        "clear": {
+         "type": "integer",
+         "minimum": -600,
+         "maximum": 600
+        }
+       }
+      },
+      "exit_peak_10min": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "exit_max_30min": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "weekday_scenario": {
+   "type": "object",
+   "required": [
+    "enabled",
+    "reason"
+   ],
+   "properties": {
+    "enabled": {
+     "type": "boolean",
+     "enum": [
+      false
+     ]
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,135 @@
+{
+ "note": "data.go.kr 파일데이터 원본(CP949) 스냅숏. 2026-11-15 포털 무키 다운로드로 받음.",
+ "files": [
+  {
+   "id": "15089962",
+   "file": "15089962/15089962_1.csv",
+   "sha256": "a016fcf592b81f852bf2c96554007f8dcf8b971c91156714c7f1c4f9f2c710cc",
+   "bytes": 17718,
+   "rows": 49,
+   "fetched_at": "2026-11-15T10:04:56+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15089962/fileData.do"
+  },
+  {
+   "id": "15090715",
+   "file": "15090715/15090715_1.csv",
+   "sha256": "3a3a5de23144a7dda76caa7eb19f5ba886defcc544486b9d1188524da0ce8ecb",
+   "bytes": 27749,
+   "rows": 126,
+   "fetched_at": "2026-11-15T10:05:06+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15090715/fileData.do"
+  },
+  {
+   "id": "15099006",
+   "file": "15099006/15099006_1.csv",
+   "sha256": "66124f98361777578edbd7168226bf6d45fa570aebfc3cfd4df0c8fca018db97",
+   "bytes": 36587,
+   "rows": 201,
+   "fetched_at": "2026-11-15T10:05:14+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15099006/fileData.do"
+  },
+  {
+   "id": "15101610",
+   "file": "15101610/15101610_1.csv",
+   "sha256": "77fd50b6a659e282f4b27809cb02a42e2363795f8c62a2e6d710c662bf2b10f1",
+   "bytes": 1243849,
+   "rows": 7133,
+   "fetched_at": "2026-11-15T10:05:17+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15101610/fileData.do"
+  },
+  {
+   "id": "15110953",
+   "file": "15110953/15110953_1.csv",
+   "sha256": "1a08d0ca9a71aec87aae3f950432c8dffd2899c7d80107d543b75c9aec8550ee",
+   "bytes": 261297,
+   "rows": 2137,
+   "fetched_at": "2026-11-15T10:05:20+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15110953/fileData.do"
+  },
+  {
+   "id": "15114776",
+   "file": "15114776/15114776_1.csv",
+   "sha256": "8efa60a38394ca4db23819000b71eeb6a06d0252ab6a28f4761e2164d00d719d",
+   "bytes": 3032873,
+   "rows": 17146,
+   "fetched_at": "2026-11-15T10:05:24+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15114776/fileData.do"
+  },
+  {
+   "id": "15118652",
+   "file": "15118652/15118652_1.csv",
+   "sha256": "070198852eed405bce557059decda1f9cb96c59666f77c63e1c677eef6b39e51",
+   "bytes": 1816302,
+   "rows": 12951,
+   "fetched_at": "2026-11-15T10:05:27+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15118652/fileData.do"
+  },
+  {
+   "id": "15131671",
+   "file": "15131671/15131671_1.csv",
+   "sha256": "31537eab9cdc6d829d02843574cbbed57fd496b870e411210ff4377582b0adda",
+   "bytes": 2121,
+   "rows": 72,
+   "fetched_at": "2026-11-15T10:05:35+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15131671/fileData.do"
+  },
+  {
+   "id": "15138735",
+   "file": "15138735/15138735_1.csv",
+   "sha256": "20f8206decf45d88fb22ae3c5971672dd7ed4bbe1b9d63eb82abbf801e1dcbb6",
+   "bytes": 9914314,
+   "rows": 215528,
+   "fetched_at": "2026-11-15T10:06:06+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15138735/fileData.do"
+  },
+  {
+   "id": "15143220",
+   "file": "15143220/15143220_1.csv",
+   "sha256": "3da8a62b47c49e97f85baaf713b8abc6a24552b57e4a1849a3c8d8a136bcd44a",
+   "bytes": 838,
+   "rows": 8,
+   "fetched_at": "2026-11-15T10:06:09+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15143220/fileData.do"
+  },
+  {
+   "id": "15147873",
+   "file": "15147873/15147873_1.csv",
+   "sha256": "151f054c13350a8c92d60866d1cdb85649bc064965285db42b7d858177f04f0c",
+   "bytes": 12357,
+   "rows": 42,
+   "fetched_at": "2026-11-15T10:06:17+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15147873/fileData.do"
+  },
+  {
+   "id": "15149169",
+   "file": "15149169/15149169_1.csv",
+   "sha256": "4bd8139084df2fc701c905a731d2b6edff9235422f45f744e6d3edfa71a39490",
+   "bytes": 62008,
+   "rows": 286,
+   "fetched_at": "2026-11-15T10:06:23+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15149169/fileData.do"
+  },
+  {
+   "id": "15164156",
+   "file": "15164156/15164156_1.csv",
+   "sha256": "5a657a990df35555fa38234712e9b9f0876bde38bb4bf73077b6f4c539700332",
+   "bytes": 27596,
+   "rows": 699,
+   "fetched_at": "2026-11-15T10:07:16+09:00",
+   "via": "portal",
+   "url": "https://www.data.go.kr/data/15164156/fileData.do"
+  }
+ ]
+}
